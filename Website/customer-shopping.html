@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Customer Shopping</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .product-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .product-item {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin: 10px 0;
+            padding: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .product-item img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .product-item h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #f7971e;
+        }
+
+        .product-item p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .order-form {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-form input, .order-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .order-form input[type="submit"], .order-form button {
+            background-color: #f7971e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .order-form input[type="submit"]:hover, .order-form button:hover {
+            background-color: #ffd200;
+        }
+
+        .order-form input[type="submit"]:active, .order-form button:active {
+            background-color: #e0c800;
+        }
+
+        .message-preview {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-preview textarea {
+            width: calc(100% - 22px);
+            height: 200px;
+            border: none;
+            resize: none;
+            font-family: 'Arial', sans-serif;
+            font-size: 1rem;
+            color: #333;
+            background: #f4f4f4;
+            padding: 10px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product List</h1>
+        <ul class="product-list" id="productList">
+            <!-- Products will be listed here -->
+        </ul>
+
+        <div class="order-form" id="orderFormContainer" style="display: none;">
+            <h2>Order Details</h2>
+            <form id="orderForm">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <input type="text" name="address" placeholder="Address" required>
+                <input type="text" name="city" placeholder="City" required>
+                <input type="text" name="state" placeholder="State" required>
+                <input type="text" name="pincode" placeholder="Pincode" required>
+                <input type="tel" name="phone" placeholder="Phone Number" required>
+                <textarea name="message" placeholder="Additional Message (optional)" rows="4"></textarea>
+                <input type="submit" value="Generate Message">
+                <button type="button" id="copyButton" style="display: none;">Copy Message</button>
+                <button type="button" id="sendMessageButton" style="display: none;">Send Message Personally</button>
+            </form>
+            <div class="message-preview" id="messagePreview" style="display: none;">
+                <h3>Message Preview:</h3>
+                <textarea readonly></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productList = document.getElementById('productList');
+            const orderFormContainer = document.getElementById('orderFormContainer');
+            const messagePreview = document.getElementById('messagePreview');
+            const copyButton = document.getElementById('copyButton');
+            const sendMessageButton = document.getElementById('sendMessageButton');
+            const messageTextarea = messagePreview.querySelector('textarea');
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const businessInstagram = localStorage.getItem('businessInstagram') || '';
+
+            function renderProducts() {
+                productList.innerHTML = '';
+                products.forEach((product, index) => {
+                    const productItem = document.createElement('li');
+                    productItem.className = 'product-item';
+                    productItem.innerHTML = `
+                        <h2>${product.name}</h2>
+                        <img src="${product.photo}" alt="${product.name}">
+                        <p>${product.description}</p>
+                        <p>Price: ₹${product.price}</p>
+                        <button onclick="showOrderForm('${product.name}', ${product.price})">Buy Now</button>
+                    `;
+                    productList.appendChild(productItem);
+                });
+            }
+
+            window.showOrderForm = function(productName, price) {
+                orderFormContainer.style.display = 'block';
+                document.getElementById('orderForm').onsubmit = function(event) {
+                    event.preventDefault();
+                    const formData = new FormData(event.target);
+                    const orderDetails = {};
+                    formData.forEach((value, key) => {
+                        orderDetails[key] = value;
+                    });
+
+                    const message = `
+                        New order received:
+                        - Product: ${productName}
+                        - Price: ₹${price}
+                        - Customer Details:
+                            Name: ${orderDetails.name}
+                            Email: ${orderDetails.email}
+                            Address: ${orderDetails.address}
+                            City: ${orderDetails.city}
+                            State: ${orderDetails.state}
+                            Pincode: ${orderDetails.pincode}
+                            Phone: ${orderDetails.phone}
+                            Message: ${orderDetails.message || 'No additional message'}
+                    `;
+
+                    messageTextarea.value = message;
+                    messagePreview.style.display = 'block';
+                    copyButton.style.display = 'inline-block';
+                    sendMessageButton.style.display = 'inline-block';
+
+                    copyButton.onclick = function() {
+                        messageTextarea.select();
+                        document.execCommand('copy');
+                        alert('Message copied to clipboard!');
+                    };
+
+                    sendMessageButton.onclick = function() {
+                        if (businessInstagram) {
+                            const instagramProfileURL = `https://www.instagram.com/${businessInstagram}/`;
+                            const encodedMessage = encodeURIComponent(message);
+                            const messageURL = `https://www.instagram.com/direct/new/?text=${encodedMessage}`;
+                            window.open(instagramProfileURL, '_blank');
+                        } else {
+                            alert('Instagram profile not set for this business.');
+                        }
+                    };
+                };
+            };
+
+            renderProducts();
+        });
+    </script>
+</body>
+</html>

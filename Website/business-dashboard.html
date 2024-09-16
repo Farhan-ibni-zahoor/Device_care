@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Business Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: auto;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        input[type="file"] {
+            margin: 10px 0;
+        }
+
+        input[type="submit"] {
+            background-color: #f7971e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #ffd200;
+        }
+
+        input[type="submit"]:active {
+            background-color: #e0c800;
+        }
+
+        .product-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .product-item {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin: 10px 0;
+            padding: 15px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .product-item img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Business Dashboard</h1>
+        <form id="productForm">
+            <input type="text" name="productName" placeholder="Product Name" required>
+            <textarea name="description" placeholder="Product Description" required></textarea>
+            <input type="file" name="photo" accept="image/*" required>
+            <input type="number" name="price" placeholder="Price (in INR)" required>
+            <input type="submit" value="Add Product">
+        </form>
+
+        <h2>Manage Products</h2>
+        <ul class="product-list" id="productList">
+            <!-- Products will be listed here -->
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productList = document.getElementById('productList');
+            let products = JSON.parse(localStorage.getItem('products')) || [];
+
+            function renderProducts() {
+                productList.innerHTML = '';
+                products.forEach((product, index) => {
+                    const productItem = document.createElement('li');
+                    productItem.className = 'product-item';
+                    productItem.innerHTML = `
+                        <h2>${product.name}</h2>
+                        <img src="${product.photo}" alt="${product.name}">
+                        <p>${product.description}</p>
+                        <p>Price: ₹${product.price}</p>
+                        <button class="delete-button" onclick="deleteProduct(${index})">Delete</button>
+                    `;
+                    productList.appendChild(productItem);
+                });
+            }
+
+            window.deleteProduct = function(index) {
+                products.splice(index, 1);
+                localStorage.setItem('products', JSON.stringify(products));
+                renderProducts();
+            };
+
+            document.getElementById('productForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                const productName = formData.get('productName');
+                const description = formData.get('description');
+                const price = formData.get('price');
+                const photoFile = formData.get('photo');
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const product = {
+                        name: productName,
+                        description: description,
+                        price: price,
+                        photo: event.target.result
+                    };
+
+                    products.push(product);
+                    localStorage.setItem('products', JSON.stringify(products));
+                    renderProducts();
+                    alert('Product added successfully!');
+                    event.target.reset();
+                };
+                reader.readAsDataURL(photoFile);
+            });
+
+            renderProducts();
+        });
+    </script>
+</body>
+</html>

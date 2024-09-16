@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Details</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.4.1/dist/email.min.js"></script>
+    <script>
+        (function() {
+            emailjs.init('YOUR_USER_ID');  // Replace 'YOUR_USER_ID' with your actual EmailJS user ID
+        })();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <h2 class="text-center">Enter Your Details</h2>
+            <form id="customerDetailsForm">
+                <div class="mb-3">
+                    <label for="customerName" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="customerName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="customerEmail" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="customerEmail" required>
+                </div>
+                <div class="mb-3">
+                    <label for="customerPhone" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="customerPhone" required>
+                </div>
+                <div class="mb-3">
+                    <label for="customerAddress" class="form-label">Address</label>
+                    <textarea class="form-control" id="customerAddress" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="customerPincode" class="form-label">Pincode</label>
+                    <input type="text" class="form-control" id="customerPincode" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('customerDetailsForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Collect customer details
+            const customerDetails = {
+                name: document.getElementById('customerName').value,
+                email: document.getElementById('customerEmail').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddress').value,
+                pincode: document.getElementById('customerPincode').value
+            };
+
+            // Send the email using EmailJS
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', customerDetails)
+            .then(function(response) {
+                alert("Your information has been submitted and sent to the owner!");
+                window.close();  // Close the popup window
+            }, function(error) {
+                alert("Failed to send the email. Please try again.");
+                console.error("EmailJS error:", error);
+            });
+        });
+    </script>
+</body>
+</html>
